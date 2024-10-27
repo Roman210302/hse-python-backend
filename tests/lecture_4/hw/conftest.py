@@ -1,7 +1,7 @@
 import pytest
+from fastapi.testclient import TestClient
 from faker import Faker
 import base64
-from fastapi.testclient import TestClient
 from http import HTTPStatus
 from pydantic import SecretStr
 from lecture_4.demo_service.api.contracts import UserResponse, RegisterUserRequest
@@ -11,40 +11,46 @@ from lecture_4.demo_service.core.users import UserInfo, UserRole
 app = create_app()
 faker = Faker()
 
-@pytest.fixture
+
+@pytest.fixture()
 def client():
-    with TestClient(app) as test_client_instance:
-        yield test_client_instance
+    with TestClient(app) as test_client:
+        yield test_client
 
-@pytest.fixture
-def fake_birthdate():
-    return faker.date_of_birth().isoformat()
 
-@pytest.fixture
-def default_password():
-    return "qwerty123456"
+@pytest.fixture()
+def birthdate():
+    return faker.date_time().isoformat()
 
-@pytest.fixture
-def admin_auth_token():
+
+@pytest.fixture()
+def password():
+    return "strongpassword123"
+
+
+@pytest.fixture()
+def admin_credentials():
     return base64.b64encode("admin:superSecretAdminPassword123".encode()).decode()
 
-@pytest.fixture
-def user_sample_info(fake_birthdate, default_password):
+
+@pytest.fixture()
+def user_info(birthdate, password):
     return UserInfo(
-        username="test_user",
-        name="Test User",
-        birthdate=fake_birthdate,
+        username="user_woopsen",
+        name="name_poopsen",
+        birthdate=birthdate,
         role=UserRole.USER,
-        password=SecretStr(default_password)
+        password=SecretStr(password)
     )
 
-@pytest.fixture
-def new_user(client, fake_birthdate, default_password, user_sample_info):
+
+@pytest.fixture()
+def user(client, password, birthdate, user_info):
     response = client.post('/user-register', json={
-        'username': user_sample_info.username,
-        'name': user_sample_info.name,
-        'birthdate': fake_birthdate,
-        'password': default_password,
+        'username': user_info.username,
+        'name': user_info.name,
+        'birthdate': birthdate,
+        'password': password,
     })
     assert response.status_code == HTTPStatus.OK
     data = response.json()
@@ -56,11 +62,12 @@ def new_user(client, fake_birthdate, default_password, user_sample_info):
         role=data['role']
     )
 
-@pytest.fixture
-def sample_registration_request(user_sample_info, default_password):
+
+@pytest.fixture()
+def register_user_request(user_info, password):
     return RegisterUserRequest(
-        username=user_sample_info.username,
-        name=user_sample_info.name,
-        birthdate=user_sample_info.birthdate,
-        password=default_password
+        username=user_info.username,
+        name=user_info.name,
+        birthdate=user_info.birthdate,
+        password=password
     )
