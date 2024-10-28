@@ -25,19 +25,19 @@ def birthdate():
 
 @pytest.fixture()
 def password():
-    return "qwerty123456"
+    return "strongpassword123"
 
 
 @pytest.fixture()
-def admin_creds():
-    return base64.b64encode("admin:secretqwerty123456".encode()).decode()
+def admin_credentials():
+    return base64.b64encode("admin:superSecretAdminPassword123".encode()).decode()
 
 
 @pytest.fixture()
 def user_info(birthdate, password):
     return UserInfo(
-        username="Nagibator228",
-        name="Legender",
+        username="user_woopsen",
+        name="name_poopsen",
         birthdate=birthdate,
         role=UserRole.USER,
         password=SecretStr(password)

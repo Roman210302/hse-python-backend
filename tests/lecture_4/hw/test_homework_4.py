@@ -5,6 +5,7 @@ from faker import Faker
 
 faker = Faker()
 
+
 def register_user(client, user_data):
     return client.post('/user-register', json=user_data)
 
@@ -33,11 +34,11 @@ def test_register_existed_user(client, user, password, birthdate):
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
-@pytest.mark.parametrize("password", ["short9", "without_nums"])
+@pytest.mark.parametrize("password", ["short123", "password_without_number"])
 def test_invalid_password(client, password):
     response = register_user(client, {
-        'username': 'Vova',
-        'name': 'Petya',
+        'username': 'user1',
+        'name': 'user1',
         'birthdate': str(faker.date_time().isoformat()),
         'password': password,
     })
@@ -48,8 +49,8 @@ def auth_header(credentials):
     return {"Authorization": f"Basic {credentials}"}
 
 
-def test_get_user(client, user, admin_creds):
-    response = client.post("/user-get", params={'id': user.uid}, headers=auth_header(admin_creds))
+def test_get_user(client, user, admin_credentials):
+    response = client.post("/user-get", params={'id': user.uid}, headers=auth_header(admin_credentials))
     json = response.json()
     assert response.status_code == HTTPStatus.OK
     assert json['username'] == user.username
